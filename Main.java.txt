@@ -1,0 +1,163 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.time.LocalDate;
+
+interface Payable {
+    int calculatePay();
+}
+
+class Employee implements Payable {
+    private String fName;
+    private String lName;
+    private String address;
+    private String email;
+    private String ssn;  // Social Security Number
+    private int employmentYear;
+
+    public Employee(String fName, String lName, String address, String email, String ssn, int employmentYear) {
+        this.fName = fName;
+        this.lName = lName;
+        this.email = email;
+        this.address = address;
+        this.ssn = ssn;
+        this.employmentYear = employmentYear;
+    }
+
+    public int calculatePay() {
+        int yearsServed = LocalDate.now().getYear() - employmentYear;
+        return 3000 + yearsServed * 1000;
+    }
+}
+
+class Developer implements Payable {
+    private Employee baseInfo;
+    private List<Technology> skills;
+
+    public Developer(String fName, String lName, String address, String email, String ssn, int employmentYear) {
+        this.baseInfo = new Employee(fName, lName, address, email, ssn, employmentYear);
+        this.skills = new ArrayList<>();
+    }
+
+    public void addTechnology(Technology tech) {
+        skills.add(tech);
+    }
+
+    public int calculatePay() {
+        int salary = baseInfo.calculatePay();
+        for (Technology tech : skills) {
+            salary += tech.getBonus();
+        }
+        return salary;
+    }
+}
+
+class Tester implements Payable {
+    private Employee baseInfo;
+    private List<String> testCapabilities;
+
+    public Tester(String fName, String lName, String address, String email, String ssn, int employmentYear) {
+        this.baseInfo = new Employee(fName, lName, address, email, ssn, employmentYear);
+        this.testCapabilities = new ArrayList<>();
+    }
+
+    public void addTestType(String testType) {
+        testCapabilities.add(testType);
+    }
+
+    public int calculatePay() {
+        int salary = baseInfo.calculatePay();
+        salary += testCapabilities.size() * 300;
+        return salary;
+    }
+}
+
+class Manager implements Payable {
+    private Employee baseInfo;
+    private List<Goal> objectives;
+
+    public Manager(String fName, String lName, String address, String email, String ssn, int employmentYear) {
+        this.baseInfo = new Employee(fName, lName, address, email, ssn, employmentYear);
+        this.objectives = new ArrayList<>();
+    }
+
+    public void addGoal(Goal goal) {
+        objectives.add(goal);
+    }
+
+    public int calculatePay() {
+        int salary = baseInfo.calculatePay();
+        LocalDate currentDate = LocalDate.now();
+        for (Goal goal : objectives) {
+            if (goal.getYear() == currentDate.getYear() && goal.getMonth() == currentDate.getMonthValue()) {
+                salary += goal.getBonus();
+            }
+        }
+        return salary;
+    }
+}
+
+class Technology {
+    private String techName;
+    private int techBonus;
+
+    public Technology(String techName, int techBonus) {
+        this.techName = techName;
+        this.techBonus = techBonus;
+    }
+
+    public int getBonus() {
+        return techBonus;
+    }
+}
+
+class Goal {
+    private int goalYear;
+    private int goalMonth;
+    private String objectiveName;
+    private int bonusAmount;
+
+    public Goal(int goalYear, int goalMonth, String objectiveName, int bonusAmount) {
+        this.goalYear = goalYear;
+        this.goalMonth = goalMonth;
+        this.objectiveName = objectiveName;
+        this.bonusAmount = bonusAmount;
+    }
+
+    public int getYear() {
+        return goalYear;
+    }
+
+    public int getMonth() {
+        return goalMonth;
+    }
+
+    public int getBonus() {
+        return bonusAmount;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        ArrayList<Payable> allEmployees = new ArrayList<>();
+        Developer dev = new Developer("Eva", "Green", "Paris", "eva@green.com", "123123123", 2018);
+        Technology scala = new Technology("Scala", 700);
+        dev.addTechnology(scala);
+        allEmployees.add(dev);
+
+        Tester qa = new Tester("Adam", "Smith", "Boston", "adam@smith.com", "321321321", 2020);
+        qa.addTestType("System Testing");
+        allEmployees.add(qa);
+
+        Manager pm = new Manager("Nora", "Jones", "London", "nora@jones.com", "231231231", 2017);
+        Goal salesIncrease = new Goal(2024, 4, "Increase Sales", 2000);
+        pm.addGoal(salesIncrease);
+        allEmployees.add(pm);
+
+        int totalPayroll = 0;
+        for (Payable employee : allEmployees) {
+            totalPayroll += employee.calculatePay();
+        }
+
+        System.out.println("Total payroll for this month: " + totalPayroll + " PLN");
+    }
+}
